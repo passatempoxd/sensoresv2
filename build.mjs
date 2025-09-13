@@ -1,15 +1,24 @@
-// Conteúdo para o arquivo build.mjs
+// build.mjs (versão 3 - final)
 import fs from 'fs';
+import path from 'path';
 
-console.log("🚀 Iniciando o script de build v2 (mais seguro)...");
+console.log("🚀 Iniciando o script de build v3 (com diretório de saída)...");
 
-const filePath = './index.html';
+// Define o diretório de saída que a Vercel espera
+const outputDir = './public';
+const sourcePath = './index.html';
+const targetPath = path.join(outputDir, 'index.html');
 
 try {
-    let content = fs.readFileSync(filePath, 'utf8');
+    // 1. Cria o diretório 'public' se ele não existir
+    if (!fs.existsSync(outputDir)){
+        fs.mkdirSync(outputDir);
+    }
 
-    // Pega os valores das variáveis de ambiente. 
-    // O '|| '' ' garante que, se a variável não existir, usaremos uma string vazia.
+    // 2. Lê o conteúdo do index.html original
+    let content = fs.readFileSync(sourcePath, 'utf8');
+
+    // 3. Pega as variáveis de ambiente
     const apiKey = process.env.FIREBASE_API_KEY || '';
     const authDomain = process.env.FIREBASE_AUTH_DOMAIN || '';
     const projectId = process.env.FIREBASE_PROJECT_ID || '';
@@ -17,7 +26,7 @@ try {
     const messagingSenderId = process.env.FIREBASE_MESSAGING_SENDER_ID || '';
     const appId = process.env.FIREBASE_APP_ID || '';
 
-    // Substitui cada placeholder no conteúdo do arquivo pelo valor real da variável
+    // 4. Substitui os placeholders
     content = content.replace(/__FIREBASE_API_KEY__/g, apiKey);
     content = content.replace(/__FIREBASE_AUTH_DOMAIN__/g, authDomain);
     content = content.replace(/__FIREBASE_PROJECT_ID__/g, projectId);
@@ -25,9 +34,10 @@ try {
     content = content.replace(/__FIREBASE_MESSAGING_SENDER_ID__/g, messagingSenderId);
     content = content.replace(/__FIREBASE_APP_ID__/g, appId);
 
-    fs.writeFileSync(filePath, content);
+    // 5. Salva o arquivo modificado DENTRO da pasta 'public'
+    fs.writeFileSync(targetPath, content);
 
-    console.log("✅ Chaves do Firebase injetadas com sucesso no index.html!");
+    console.log(`✅ Chaves do Firebase injetadas com sucesso em ${targetPath}!`);
 
 } catch (error) {
     console.error("❌ Erro durante o script de build:", error);
